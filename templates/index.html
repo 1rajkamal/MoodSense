@@ -6,117 +6,231 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: var(--bg-color, #f4f4f4);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            transition: background 0.4s ease;
             margin: 0;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.light {
+            background: #f4f4f4;
+            color: #222;
+        }
+
+        body.dark {
+            background: #121212;
+            color: #f5f5f5;
         }
 
         .card {
-            background: var(--card-bg, white);
-            padding: 25px 35px;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            width: 400px;
+            background: white;
+            padding: 24px 32px;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            width: 520px;
             text-align: center;
-            transition: background 0.4s;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        body.dark .card {
+            background: #1f1f1f;
+            box-shadow: 0 4px 18px rgba(255,255,255,0.08);
+        }
+
+        .title-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            margin-top: 4px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            opacity: 0.85;
+        }
+
+        .label-text {
+            margin-top: 10px;
+            margin-bottom: 4px;
+            font-size: 14px;
+            text-align: left;
         }
 
         textarea {
             width: 100%;
             height: 90px;
             padding: 12px;
-            margin-top: 12px;
-            border-radius: 10px;
-            border: 2px solid var(--border-color, #ddd);
+            border-radius: 8px;
+            border: none;
             resize: none;
-            font-size: 15px;
+            font-size: 14px;
+            background: #f1f1f1;
+        }
+
+        textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(76,175,80,0.25);
+        }
+
+        body.dark textarea {
+            background: #171717;
+            color: #f5f5f5;
         }
 
         button {
-            margin-top: 18px;
-            padding: 12px;
-            width: 100%;
-            border-radius: 10px;
+            margin-top: 14px;
+            padding: 10px 22px;
+            border-radius: 8px;
             border: none;
             cursor: pointer;
-            font-size: 17px;
+            font-size: 16px;
             background: #4CAF50;
             color: white;
-            transition: 0.3s;
         }
 
-        .result {
+        .theme-toggle {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            cursor: pointer;
+            font-size: 22px;
+        }
+
+        .result-main {
             margin-top: 18px;
             font-size: 20px;
-            font-weight: bold;
+            font-weight: 600;
         }
 
-        .bar-container {
+        .result-main.happy {
+            color: #2e7d32;
+        }
+
+        .result-main.sad {
+            color: #c62828;
+        }
+
+        body.dark .result-main.happy {
+            color: #8bc34a;
+        }
+
+        body.dark .result-main.sad {
+            color: #ff8a80;
+        }
+
+        .conf-text {
+            margin-top: 6px;
+            font-size: 14px;
+            opacity: 0.85;
+        }
+
+        .progress-wrapper {
+            margin-top: 8px;
             width: 100%;
-            height: 14px;
-            background: #ddd;
-            border-radius: 10px;
-            margin-top: 10px;
         }
 
-        .bar {
+        .progress-track {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        body.dark .progress-track {
+            background: #555;
+        }
+
+        .progress-fill {
             height: 100%;
-            width: 0%;
-            transition: width 1s ease;
-            border-radius: 10px;
+            width: 0;
+            border-radius: 999px;
+            transition: width 0.4s ease;
         }
 
-        .toggle {
-            cursor: pointer;
-            font-size: 26px;
-            position: absolute;
-            top: 20px;
-            right: 20px;
+        .progress-fill.happy {
+            background: linear-gradient(90deg, #66bb6a, #2e7d32);
+        }
+
+        .progress-fill.sad {
+            background: linear-gradient(90deg, #ef5350, #c62828);
         }
     </style>
 </head>
-<body>
+<body class="light" id="page-body">
+    <span class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</span>
 
-<span class="toggle" onclick="toggleTheme()">🌙</span>
-
-<div class="card">
-    <h2>🎭 MoodSense - Happy/Sad Analyzer</h2>
-    <p>Type your message:</p>
-
-    <form method="POST">
-        <textarea name="message" placeholder="Type something...">{{ user_text }}</textarea>
-        <button type="submit">Check Mood</button>
-    </form>
-
-    {% if mood %}
-        <div class="result">{{ mood }} {{ emoji }}</div>
-        <p>Confidence: {{ confidence }}%</p>
-
-        <div class="bar-container">
-            <div class="bar" style="background: {{ bar_color }}; width: {{ confidence }}%;"></div>
+    <div class="card">
+        <div class="title-row">
+            <div style="font-size:22px;">🎭</div>
+            <div style="font-size:20px;font-weight:600;">MoodSense - Happy/Sad Analyzer</div>
         </div>
-    {% endif %}
-</div>
+        <div class="subtitle">Type a sentence and let AI guess your mood.</div>
 
-<script>
-function toggleTheme() {
-    if (document.body.style.background === "rgb(34, 34, 34)") {
-        document.body.style.background = "#f4f4f4";
-        document.documentElement.style.setProperty('--card-bg', 'white');
-        document.documentElement.style.setProperty('--border-color', '#ddd');
-        document.querySelector(".toggle").innerHTML = "🌙";
-    } else {
-        document.body.style.background = "#222";
-        document.documentElement.style.setProperty('--card-bg', '#333');
-        document.documentElement.style.setProperty('--border-color', '#555');
-        document.querySelector(".toggle").innerHTML = "☀";
-    }
-}
-</script>
+        <div class="label-text">Type your message:</div>
+        <form method="POST">
+            <textarea name="message" placeholder="Type something...">{{ user_text }}</textarea>
+            <br>
+            <button type="submit">Check Mood</button>
+        </form>
 
+        {% if mood %}
+            <div class="result-main {% if 'HAPPY' in mood %}happy{% elif 'SAD' in mood %}sad{% endif %}">
+                {{ mood }} {% if 'HAPPY' in mood %}😄{% elif 'SAD' in mood %}😢{% endif %}
+            </div>
+
+            {% if confidence %}
+            <div class="conf-text">
+                Confidence: {{ confidence }}%
+            </div>
+
+            <div class="progress-wrapper">
+                <div class="progress-track">
+                    <div id="progressFill"
+                         class="progress-fill {% if 'HAPPY' in mood %}happy{% elif 'SAD' in mood %}sad{% endif %}"
+                         data-conf="{{ confidence }}"></div>
+                </div>
+            </div>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <script>
+        // ----- Theme with localStorage -----
+        function applyTheme(mode) {
+            const body = document.getElementById("page-body");
+            const btn  = document.getElementById("themeToggle");
+            body.className = mode;
+            btn.textContent = mode === "dark" ? "☀️" : "🌙";
+        }
+
+        function toggleTheme() {
+            const current = localStorage.getItem("moodTheme") || "light";
+            const next = current === "light" ? "dark" : "light";
+            localStorage.setItem("moodTheme", next);
+            applyTheme(next);
+        }
+
+        // Apply saved theme on each page load
+        const savedTheme = localStorage.getItem("moodTheme") || "light";
+        applyTheme(savedTheme);
+
+        // ----- Progress bar fill -----
+        window.addEventListener("load", () => {
+            const fill = document.getElementById("progressFill");
+            if (!fill) return;
+            let conf = parseFloat(fill.getAttribute("data-conf") || "0");
+            if (isNaN(conf)) conf = 0;
+            conf = Math.max(0, Math.min(conf, 100));
+            requestAnimationFrame(() => {
+                fill.style.width = conf + "%";
+            });
+        });
+    </script>
 </body>
 </html>
