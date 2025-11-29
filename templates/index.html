@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MoodSense - Happy/Sad Analyzer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--bg-color, #f4f4f4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            transition: background 0.4s ease;
+            margin: 0;
+        }
+
+        .card {
+            background: var(--card-bg, white);
+            padding: 25px 35px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            width: 400px;
+            text-align: center;
+            transition: background 0.4s;
+        }
+
+        textarea {
+            width: 100%;
+            height: 90px;
+            padding: 12px;
+            margin-top: 12px;
+            border-radius: 10px;
+            border: 2px solid var(--border-color, #ddd);
+            resize: none;
+            font-size: 15px;
+        }
+
+        button {
+            margin-top: 18px;
+            padding: 12px;
+            width: 100%;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 17px;
+            background: #4CAF50;
+            color: white;
+            transition: 0.3s;
+        }
+
+        .result {
+            margin-top: 18px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .bar-container {
+            width: 100%;
+            height: 14px;
+            background: #ddd;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .bar {
+            height: 100%;
+            width: 0%;
+            transition: width 1s ease;
+            border-radius: 10px;
+        }
+
+        .toggle {
+            cursor: pointer;
+            font-size: 26px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<span class="toggle" onclick="toggleTheme()">🌙</span>
+
+<div class="card">
+    <h2>🎭 MoodSense - Happy/Sad Analyzer</h2>
+    <p>Type your message:</p>
+
+    <form method="POST">
+        <textarea name="message" placeholder="Type something...">{{ user_text }}</textarea>
+        <button type="submit">Check Mood</button>
+    </form>
+
+    {% if mood %}
+        <div class="result">{{ mood }} {{ emoji }}</div>
+        <p>Confidence: {{ confidence }}%</p>
+
+        <div class="bar-container">
+            <div class="bar" style="background: {{ bar_color }}; width: {{ confidence }}%;"></div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleTheme() {
+    if (document.body.style.background === "rgb(34, 34, 34)") {
+        document.body.style.background = "#f4f4f4";
+        document.documentElement.style.setProperty('--card-bg', 'white');
+        document.documentElement.style.setProperty('--border-color', '#ddd');
+        document.querySelector(".toggle").innerHTML = "🌙";
+    } else {
+        document.body.style.background = "#222";
+        document.documentElement.style.setProperty('--card-bg', '#333');
+        document.documentElement.style.setProperty('--border-color', '#555');
+        document.querySelector(".toggle").innerHTML = "☀";
+    }
+}
+</script>
+
+</body>
+</html>
